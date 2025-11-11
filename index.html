@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniGuía UVA - Universidad del Valle Andino</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e8ba3 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .chat-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 600px;
+            height: 700px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .chat-header h1 {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .chat-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f5f7fa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            text-align: right;
+        }
+
+        .message.bot {
+            text-align: left;
+        }
+
+        .message-bubble {
+            display: inline-block;
+            padding: 12px 18px;
+            border-radius: 18px;
+            max-width: 80%;
+            word-wrap: break-word;
+            white-space: pre-line;
+            line-height: 1.5;
+        }
+
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.bot .message-bubble {
+            background: white;
+            color: #333;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-bottom-left-radius: 4px;
+        }
+
+        .quick-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+            max-width: 80%;
+        }
+
+        .quick-option-btn {
+            background: #e8f0fe;
+            color: #1e3c72;
+            border: 1px solid #d0e1fd;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-option-btn:hover {
+            background: #d0e1fd;
+            transform: translateY(-1px);
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+        }
+
+        #userInput {
+            flex: 1;
+            padding: 14px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        #userInput:focus {
+            border-color: #2a5298;
+        }
+
+        #sendButton {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 25px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        #sendButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(30, 60, 114, 0.3);
+        }
+
+        #sendButton:active {
+            transform: translateY(0);
+        }
+
+        #sendButton:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Scrollbar styling */
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #bbb;
+            border-radius: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #999;
+        }
+
+        .timestamp {
+            font-size: 11px;
+            color: #999;
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        .bot-typing {
+            display: inline-block;
+            padding: 12px 18px;
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .typing-dots {
+            display: inline-flex;
+            gap: 4px;
+        }
+
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #999;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.5;
+            }
+            30% {
+                transform: translateY(-8px);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>🎓 UniGuía UVA</h1>
+            <p>Universidad del Valle Andino</p>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input-container">
+            <input 
+                type="text" 
+                id="userInput" 
+                placeholder="Escribe tu pregunta aquí..."
+                autocomplete="off"
+            >
+            <button id="sendButton">Enviar</button>
+        </div>
+    </div>
+
+    <script>
+        const chatMessages = document.getElementById('chatMessages');
+        const userInput = document.getElementById('userInput');
+        const sendButton = document.getElementById('sendButton');
+        
+        // ID de sesión único para mantener el contexto de conversación
+        const sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        
+        let conversationContext = {
+            isFirstInteraction: true
+        };
+
+        // Ya no necesitamos base de conocimiento local - todo es generativo con Gemini
+
+        function addMessage(content, isUser, options = []) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = 'message-bubble';
+            bubbleDiv.textContent = content;
+            
+            messageDiv.appendChild(bubbleDiv);
+            chatMessages.appendChild(messageDiv);
+
+            // Agregar botones de opciones rápidas si existen
+            if (!isUser && options.length > 0) {
+                const optionsDiv = document.createElement('div');
+                optionsDiv.className = 'quick-options';
+                
+                options.forEach(option => {
+                    const btn = document.createElement('button');
+                    btn.className = 'quick-option-btn';
+                    btn.textContent = option;
+                    btn.onclick = () => {
+                        userInput.value = option.replace(/[📍📝📚🏢]/g, '').trim();
+                        sendMessage();
+                    };
+                    optionsDiv.appendChild(btn);
+                });
+                
+                messageDiv.appendChild(optionsDiv);
+            }
+            
+            scrollToBottom();
+        }
+
+        function showTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot';
+            typingDiv.id = 'typing-indicator';
+            typingDiv.innerHTML = `
+                <div class="bot-typing">
+                    <div class="typing-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            `;
+            chatMessages.appendChild(typingDiv);
+            scrollToBottom();
+        }
+
+        function removeTypingIndicator() {
+            const typing = document.getElementById('typing-indicator');
+            if (typing) typing.remove();
+        }
+
+        function scrollToBottom() {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Función para obtener respuesta generativa completa de Gemini
+        async function getBotResponse(userMessage) {
+            try {
+                const response = await fetch('http://localhost:3000/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: userMessage,
+                        sessionId: sessionId
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al comunicarse con el servidor');
+                }
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    return {
+                        text: data.response,
+                        quickOptions: [] // Sin opciones predefinidas, la IA puede sugerir lo que quiera
+                    };
+                } else {
+                    console.error('Error en la respuesta:', data.error);
+                    return null;
+                }
+            } catch (error) {
+                console.error('Error al obtener respuesta:', error);
+                return {
+                    text: '⚠️ No puedo conectarme con el servidor.\n\nPor favor verifica que:\n• El servidor esté ejecutándose\n• Hayas ejecutado "npm start" en la terminal\n• El puerto 3000 esté disponible',
+                    quickOptions: []
+                };
+            }
+        }
+
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            
+            if (message === '') return;
+            
+            // Deshabilitar input mientras se procesa
+            userInput.disabled = true;
+            sendButton.disabled = true;
+            
+            // Agregar mensaje del usuario
+            addMessage(message, true);
+            userInput.value = '';
+            
+            // Mostrar indicador de escritura
+            showTypingIndicator();
+            
+            try {
+                // Obtener respuesta usando IA
+                const response = await getBotResponse(message);
+                
+                // Pequeña pausa para que se vea más natural
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                removeTypingIndicator();
+                addMessage(response.text, false, response.quickOptions || []);
+                
+                // Actualizar contexto
+                if (conversationContext.isFirstInteraction) {
+                    conversationContext.isFirstInteraction = false;
+                }
+            } catch (error) {
+                console.error('Error al procesar mensaje:', error);
+                removeTypingIndicator();
+                addMessage('Lo siento, tuve un problema al procesar tu mensaje. ¿Podrías intentar de nuevo?', false);
+            } finally {
+                // Rehabilitar input
+                userInput.disabled = false;
+                sendButton.disabled = false;
+                userInput.focus();
+            }
+        }
+
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage);
+        
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !userInput.disabled) {
+                sendMessage();
+            }
+        });
+
+        // Mensaje de bienvenida inicial
+        window.addEventListener('load', async () => {
+            // Obtener mensaje de bienvenida generativo
+            setTimeout(async () => {
+                const welcome = await getBotResponse('Hola');
+                if (welcome) {
+                    addMessage(welcome.text, false, welcome.quickOptions || []);
+                    conversationContext.isFirstInteraction = false;
+                }
+            }, 500);
+            
+            userInput.focus();
+        });
+    </script>
+</body>
+</html>
+
