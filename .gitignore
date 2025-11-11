@@ -1,22 +1,82 @@
 # Dependencias
 node_modules/
 package-lock.json
+jspm_packages/
 
-# Variables de entorno (si decides mover la API Key aquí en el futuro)
+# Variables de entorno - ⚠️ CRÍTICO: Nunca subir archivos .env
 .env
+.env.*
 .env.local
+.env.test
+!.env.example
 
 # Logs
+logs/
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+server.log
 
 # Sistema operativo
 .DS_Store
 Thumbs.db
+ehthumbs.db
 
-# Editor
+# Editor / IDE
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
 
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory
+coverage
+*.lcov
+.nyc_output
+
+# Dependency directories
+bower_components/
+web_modules/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# dotenv environment variable files (redundante pero importante)
+.env
+.env.development
+.env.production
+.env.staging
+!.env.example
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.nuxt/
+
+# Cache directories
+.cache/
+.parcel-cache/
+.vitepress/cache/
+
+# Temporary files
+tmp/
+temp/
